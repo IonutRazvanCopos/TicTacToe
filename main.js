@@ -1,6 +1,6 @@
 const game = document.getElementById('game');
 const btnReset = document.getElementById('btnReset');
-let gmov = false;
+let gmov = false; // Am pus aici gmov, ca si o prescurtare a cuvantului gameOver
 
 let player = "X", moves = 0;
 const array = [[null, null, null],
@@ -11,12 +11,12 @@ generateTable();
 btnReset.addEventListener('click', resetGame);
 
 game.addEventListener('click', (e) => {
+    if (gmov) {
+      return;
+    }
     const clicktg = e.target;
     let lines = parseInt(clicktg.getAttribute('lines'));
     let columns = parseInt(clicktg.getAttribute('columns'));
-    if (gmov) {
-        return;
-    }
     if (array[lines][columns]) {
         return;
     }
@@ -25,9 +25,11 @@ game.addEventListener('click', (e) => {
     ++moves;
     if(gameOver(lines, columns, player)) {
         alert(`Player ${player} wins!`);
+        document.getElementById('winner').textContent = `Player ${player} wins!`;
         btnReset.disabled = false;
     } else if (moves == 9) {
         alert('Draw');
+        document.getElementById('winner').textContent = `Draw!`;
         btnReset.disabled = false;
     } else {
         changePlayer();
@@ -42,13 +44,12 @@ function changePlayer() {
         document.getElementById('player').textContent = player;
     }
     Array.from(document.querySelectorAll('div[lines]')).forEach(e => {
-        e.textContext = null;
-    });
-    document.getElementById('player').textContent = player;
-    moves = 0;
-    if (Array.from(document.querySelectorAll('div[lines]')).every(e => e.textContent !== '')) {
-        document.getElementById('btnReset').disabled = false;
-    }
+      e.textContext = null;
+  });
+  document.getElementById('player').textContent = player;
+  if (Array.from(document.querySelectorAll('div[lines]')).every(e => e.textContent !== '')) {
+      document.getElementById('btnReset').disabled = false;
+  }
 }
 
 function resetGame() {
@@ -59,11 +60,20 @@ function resetGame() {
     }
     Array.from(document.querySelectorAll('div[lines]')).forEach(x => {
         x.textContent = null;
+        document.getElementById('winner').textContent = ``;
       });
       document.getElementById('player').textContent = player;
       moves = 0;
       btnReset.disabled = true;
       gmov = false;
+}
+
+function checkWin(count) {
+  if (count == 3) {
+    gmov = true;
+    return true;
+  }
+  return false;
 }
 
 function gameOver(lines, columns, player) {
@@ -73,8 +83,8 @@ function gameOver(lines, columns, player) {
             ++count;
         }
       }
-      if (count == 3) {
-         return true;
+      if (checkWin(count)) {
+        return true;
       }
       count = 0;
       for (let i = 0; i < 3; ++i) {
@@ -82,8 +92,7 @@ function gameOver(lines, columns, player) {
           ++count;
         }
       }
-      if (count == 3) {
-        gmov = true;
+      if (checkWin(count)) {
         return true;
       }
       if (lines == columns) {
@@ -101,8 +110,7 @@ function gameOver(lines, columns, player) {
           }
         }
       }
-      if (count == 3) {
-        gmov = true;
+      if (checkWin(count)) {
         return true;
       }
       return false;
