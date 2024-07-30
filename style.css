@@ -40,3 +40,8 @@ button {
     min-width: 100px;
     margin: 0 auto;
 }
+
+.win {
+    text-align: center;
+    font-size: 1.5rem;
+}
