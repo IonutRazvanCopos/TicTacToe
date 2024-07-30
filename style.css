@@ -1,3 +1,7 @@
+body {
+    background-color: rgb(207, 252, 253);
+}
+
 h1 {
     text-align: center;
 }
@@ -24,7 +28,7 @@ h1 {
 }
 
 .container div:hover {
-    background-color: lightgray;
+    background-color: rgba(0, 223, 231, 0.308);
 }
 
 .container div[columns = "2"] {
@@ -36,9 +40,18 @@ h1 {
 }
 
 button {
+    background-color: aqua;
     display: block;
     min-width: 100px;
     margin: 0 auto;
+    box-shadow: 0 0 5px cyan,
+    0 0 25px cyan;
+}
+
+button:hover {
+    box-shadow: 0 0 5px cyan,
+    0 0 25px cyan, 0 0 50px cyan,
+    0 0 100px cyan, 0 0 200px cyan;
 }
 
 .win {
