@@ -1,55 +1,63 @@
+const boxes = document.querySelectorAll('.box');
 const game = document.getElementById('game');
 const btnReset = document.getElementById('btnReset');
-let gmov = false; // Am pus aici gmov, ca si o prescurtare a cuvantului gameOver
+let gameEnds = false;
 
-let player = "X", moves = 0;
-const array = [[null, null, null],
-            [null, null, null],
-            [null, null, null]];
+const options = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6]
+];
+let array = [
+  [null, null, null],
+  [null, null, null],
+  [null, null, null]
+];
+let player = "X";
 
 generateTable();
-btnReset.addEventListener('click', resetGame);
 
-game.addEventListener('click', (e) => {
-    if (gmov) {
-      return;
-    }
-    const clicktg = e.target;
-    let lines = parseInt(clicktg.getAttribute('lines'));
-    let columns = parseInt(clicktg.getAttribute('columns'));
-    if (array[lines][columns]) {
-        return;
-    }
-    array[lines][columns] = player;
-    clicktg.innerHTML = player;
-    ++moves;
-    if(gameOver(lines, columns, player)) {
-        alert(`Player ${player} wins!`);
-        document.getElementById('winner').textContent = `Player ${player} wins!`;
-        btnReset.disabled = false;
-    } else if (moves == 9) {
-        alert('Draw');
-        document.getElementById('winner').textContent = `Draw!`;
-        btnReset.disabled = false;
-    } else {
-        changePlayer();
-    }
-});
+function generateTable() {
+  const maxNr = 9;
+  for (let i = 0; i < maxNr; ++i) {
+    let e = document.createElement('div');
+    e.classList.add('box');
+    e.setAttribute('boxIndex', i);
+    e.addEventListener('click', boxClicked);
+    let lines = Math.floor(i / 3);
+    let columns = i % 3;
+    e.setAttribute('lines', lines);
+    e.setAttribute('columns', columns);
+    game.appendChild(e);
+  }
+  btnReset.addEventListener('click', resetGame);
+  gameEnds = true;
+}
+
+function boxClicked() {
+  const boxIndex = this.getAttribute("boxIndex");
+  const lineIndex = Math.floor(boxIndex / 3);
+  const colIndex = boxIndex % 3;
+  if (array[lineIndex][colIndex] != null || !gameEnds) {
+    return;
+  }
+  updateBox(this, lineIndex, colIndex);
+  checkWin();
+}
+
+function updateBox(box, lineIndex, colIndex) {
+  array[lineIndex][colIndex] = player;
+  box.textContent = player;
+}
 
 function changePlayer() {
-    if (player == 'X') {
-        player = "0";
-    } else {
-        player = "X";
-        document.getElementById('player').textContent = player;
-    }
-    Array.from(document.querySelectorAll('div[lines]')).forEach(e => {
-      e.textContext = null;
-  });
-  document.getElementById('player').textContent = player;
-  if (Array.from(document.querySelectorAll('div[lines]')).every(e => e.textContent !== '')) {
-      document.getElementById('btnReset').disabled = false;
-  }
+  player = (player == "X") ? "0" : "X";
+  document.getElementById("player").textContent = `${player}`;
 }
 
 function resetGame() {
@@ -58,73 +66,39 @@ function resetGame() {
             array[i][j] = null;
         }
     }
-    Array.from(document.querySelectorAll('div[lines]')).forEach(x => {
-        x.textContent = null;
-        document.getElementById('winner').textContent = ``;
-      });
-      document.getElementById('player').textContent = player;
-      moves = 0;
-      btnReset.disabled = true;
-      gmov = false;
+    Array.from(document.querySelectorAll('.box')).forEach(x => {
+        x.textContent = "";
+    });
+    document.getElementById('winner').textContent = "";
+    document.getElementById('player').textContent = player;
+    btnReset.disabled = true;
+    gameEnds = true;
 }
 
-function checkWin(count) {
-  if (count == 3) {
-    gmov = true;
-    return true;
-  }
-  return false;
-}
+function checkWin() {
+  let winner = false;
+  for (let i = 0; i < options.length; ++i) {
+    const condition = options[i];
+    const line1 = array[Math.floor(condition[0] / 3)][condition[0] % 3];
+    const line2 = array[Math.floor(condition[1] / 3)][condition[1] % 3];
+    const line3 = array[Math.floor(condition[2] / 3)][condition[2] % 3];
 
-function gameOver(lines, columns, player) {
-    let count = 0;
-    for (let i = 0; i < 3; ++i) {
-        if (array[lines][i] == player) {
-            ++count;
-        }
-      }
-      if (checkWin(count)) {
-        return true;
-      }
-      count = 0;
-      for (let i = 0; i < 3; ++i) {
-        if (array[i][columns] == player) {
-          ++count;
-        }
-      }
-      if (checkWin(count)) {
-        return true;
-      }
-      if (lines == columns) {
-        count = 0;
-        for (let i = 0; i < 3; ++i) {
-          if (array[i][i] == player) {
-            ++count;
-          }
-        }
-      } else if (lines + columns == 2) {
-        count = 0;
-        for (let i = 0; i < 3; ++i) {
-          if (array[i][3 - i - 1] == player) {
-            ++count;
-          }
-        }
-      }
-      if (checkWin(count)) {
-        return true;
-      }
-      return false;
-}
-
-function generateTable() {
-    let lines, columns;
-    const maxNr = 9;
-    for (let i = 0; i < maxNr; ++i) {
-        let e = document.createElement('div');
-        lines = Math.round((i + 2) / 3) - 1;
-        columns = Math.round(i % 3);
-        e.setAttribute('lines', lines);
-        e.setAttribute('columns', columns);
-        game.appendChild(e);
+    if (line1 == null || line2 == null || line3 == null) {
+      continue;
+    } else if (line1 == line2 && line2 == line3) {
+      winner = true;
+      document.getElementById('winner').textContent = `Winner: ${player}`;
+      break;
     }
+  }
+  if (winner) {
+    gameEnds = false;
+    btnReset.disabled = false;
+  } else if (!array.flat().includes(null)) {
+    gameEnds = false;
+    btnReset.disabled = false;
+    document.getElementById('winner').textContent = "Draw!";
+  } else {
+    changePlayer();
+  }
 }
