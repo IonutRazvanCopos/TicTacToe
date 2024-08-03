@@ -1,4 +1,3 @@
-const boxes = document.querySelectorAll('.box');
 const game = document.getElementById('game');
 const btnReset = document.getElementById('btnReset');
 let gameEnds = false;
@@ -29,7 +28,7 @@ function generateTable() {
     e.classList.add('box');
     e.setAttribute('boxIndex', i);
     e.addEventListener('click', boxClicked);
-    let lines = Math.floor(i / 3);
+    let lines = i / 3;
     let columns = i % 3;
     e.setAttribute('lines', lines);
     e.setAttribute('columns', columns);
